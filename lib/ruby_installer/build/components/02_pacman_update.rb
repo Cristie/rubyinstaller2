@@ -7,13 +7,17 @@ class PacmanUpdate < Base
   end
 
   def description
-    "MSYS2 system update"
+    "MSYS2 system update (optional)"
   end
 
   def execute(args)
     msys.with_msys_apps_enabled do
-      # Update the package database and core system packages
+      puts "Remove catgets to avoid conflicts while update  ..."
+      # See https://github.com/Alexpux/MSYS2-packages/issues/1141
+      run_verbose("pacman", "-Rdd", "catgets", "libcatgets", "--noconfirm")
+
       puts "#{description} part 1  ..."
+      # Update the package database and core system packages
       res = run_verbose("pacman", "-Syu", *pacman_args)
       puts "#{description} #{res ? green("succeeded") : red("failed")}"
       raise "pacman failed" unless res

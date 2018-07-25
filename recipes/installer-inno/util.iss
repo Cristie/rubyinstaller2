@@ -23,7 +23,7 @@ end;
 function GetUserHive(): Integer;
 begin
   if IsAdminLoggedOn or IsPowerUserLoggedOn then
-    Result :=  HKLM
+    Result := HKLM
   else
     Result := HKCU;
 end;
@@ -216,4 +216,56 @@ begin
   end;
 
   Result := RegChangeFlag;
+end;
+
+function GetUninstallString(): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+  appId: String;
+begin
+  appId := RemoveQuotes('{#emit SetupSetting("AppId")}');
+  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\' + appId + '_is1');
+  sUnInstallString := '';
+  Log('Check registry for previous RubyInstaller: ' + sUnInstPath);
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+procedure UnInstallOldVersion();
+var
+  sUnInstallString: String;
+  iResultCode: Integer;
+  sUninstParams: String;
+begin
+  sUnInstallString := GetUninstallString();
+  if sUnInstallString <> '' then begin
+    // Previous RubyInstaller detected
+
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    sUninstParams := '/NORESTART /SUPPRESSMSGBOXES';
+    if WizardSilent then sUninstParams := sUninstParams + ' /VERYSILENT'
+    else sUninstParams := sUninstParams + ' /SILENT';
+
+    Log('Update installation detected - doing uninstall first: ' + sUnInstallString + ' ' + sUninstParams);
+    if Exec(sUnInstallString, sUninstParams, '', SW_HIDE, ewWaitUntilTerminated, iResultCode) then
+      Log('Successfully uninstalled previous ruby version')
+    else
+      Log('Failed to uninstalled previous ruby version');
+  end else
+    Log('No previous ruby version found');
+end;
+
+function Msys2AlreadyInstalled(): String;
+begin
+  if DirExists(ExpandConstant('{app}\msys32')) then Result := ExpandConstant('{app}\msys32')
+  else if DirExists(ExpandConstant('{app}\msys64')) then Result := ExpandConstant('{app}\msys64')
+  else Result := '';
+end;
+
+procedure DeleteRubyMsys2Directory();
+begin
+  DelTree(ExpandConstant('{app}/msys32'), True, True, True);
+  DelTree(ExpandConstant('{app}/msys64'), True, True, True);
 end;

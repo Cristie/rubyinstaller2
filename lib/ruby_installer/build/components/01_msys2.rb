@@ -8,12 +8,14 @@ class Msys2 < Base
 
   def needed?
     begin
-      print "MSYS2 seems to be "
-      msys.msys_path
-      puts green("already installed")
-      false
+      if msys.with_msys_apps_enabled(if_no_msys: :raise) { run_verbose("sh", "-lc", "true") }
+        puts "MSYS2 seems to be " + green("properly installed")
+        false
+      else
+        true
+      end
     rescue Msys2Installation::MsysNotFound
-      puts red("unavailable")
+      puts "MSYS2 seems to be " + red("unavailable")
       true
     end
   end
@@ -47,7 +49,7 @@ class Msys2 < Base
     end
 
     puts "Run the MSYS2 installer ..."
-    if run_verbose(temp_path)
+    if run_verbose(temp_path) && msys.with_msys_apps_enabled { run_verbose("sh", "-lc", "true") }
       puts green(" Success")
     else
       puts red(" Failed")
@@ -57,11 +59,11 @@ class Msys2 < Base
 
   private
 
-  MSYS2_VERSION = ENV['MSYS2_VERSION'] || "20161025"
+  MSYS2_VERSION = ENV['MSYS2_VERSION'] || "20180531"
   MSYS2_URI = "http://repo.msys2.org/distrib/<arch>/msys2-<arch>-#{MSYS2_VERSION}.exe"
 
-  MSYS2_I686_SHA256 = "4951a47177777a54c7ad4ac99755ba4bbdf1a0cb23a174a72d91f71dc25bcb15"
-  MSYS2_X86_64_SHA256 = "2c198787ea1c4be39ff80466c4d831f8c7f06bd56d6d190bf63ede35292e344c"
+  MSYS2_I686_SHA256 = "27da9bf74614f3a07be6151e4d7d702e54bd6443649d387912676ab150d859a1"
+  MSYS2_X86_64_SHA256 = "3b233de38cb0393b40617654409369e025b5e6262d3ad60dbd6be33b4eeb8e7b"
 
   def msys2_download_uri
     arch = RUBY_PLATFORM=~/x64/ ? "x86_64" : "i686"

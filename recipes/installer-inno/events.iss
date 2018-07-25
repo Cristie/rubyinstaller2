@@ -22,6 +22,11 @@ begin
       if IsUtf8 then
         ModifyRubyopt(['-Eutf-8']);
 
+      UnInstallOldVersion();
+
+      if IsComponentSelected('msys2') then
+        DeleteRubyMsys2Directory();
+
     end else
       MsgBox('Looks like you''ve got on older, unsupported Windows version.' #13 +
              'Proceeding with a reduced feature set installation.',
@@ -40,6 +45,14 @@ procedure CurPageChanged(CurPageID: Integer);
 begin
   if CurPageID = wpSelectDir then
     WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
+
+  {* Disable MSYS2 component install, when it is already present in the install directory,
+     but take component selection as set per /COMPONENTS param when in slient install. *}
+  if (CurPageID = wpSelectComponents) and (not WizardSilent) then
+  begin
+    EnableMsys2Component(Msys2AlreadyInstalled() = '');
+    ComplistClickCheck(TObject.Create);
+  end;
 end;
 
 procedure RegisterPreviousData(PreviousDataKey: Integer);
@@ -71,4 +84,17 @@ begin
         ModifyRubyopt(['-Eutf-8']);
     end;
   end;
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+
+  {* Skip components page if RubyInstaller without MSYS2 is running and no previous Ruby MSYS2 directory is present. *}
+  if (PageID = wpSelectComponents) and
+      (not IsComponentSelected('msys2')) and
+      (Msys2AlreadyInstalled() = '') then
+    Result := True
+  else
+    {* In all other cases present the components page, to show what is getting installed. *}
+    Result := False;
 end;

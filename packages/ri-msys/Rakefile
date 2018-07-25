@@ -10,8 +10,8 @@ class RubyPackage < RubyInstaller::Build::Openstruct
     super
 
     self.rubyver, self.pkgrel = packagever.split("-", 2)
-    self.packagename = "rubybundle"
-    self.rubyver2 = rubyver[/^\d+\.\d+/]
+    self.packagename = "rubyinstaller-devkit"
+    self.rubyver2 = packagever=='head' ? "2.6" : rubyver[/^\d+\.\d+/]
 
     self.install_gems = %w[]
 
@@ -23,7 +23,6 @@ class RubyPackage < RubyInstaller::Build::Openstruct
       self.msysdir = "msys64"
       self.mingwdir = "mingw64"
       self.default_instdir = "C:\\Ruby#{rubyver2.gsub(".","")}-x64"
-      self.name = "rubybundle-#{rubyver}-x64"
     when 'x86'
       self.pacman_arch = "mingw-w64-i686"
       self.ruby_arch = "i386-mingw32"
@@ -31,18 +30,19 @@ class RubyPackage < RubyInstaller::Build::Openstruct
       self.msysdir = "msys32"
       self.mingwdir = "mingw32"
       self.default_instdir = "C:\\Ruby#{rubyver2.gsub(".","")}"
-      self.name = "rubybundle-#{rubyver}-x86"
     else
       raise "invalid arch #{arch}"
     end
-    self.packagenameverarch = "#{packagename}-#{packagever}-#{arch}"
+
+    self.packagenameverarch = "#{packagename}-#{ packagever=='head' ? 'head' : packagever }-#{arch}"
+    self.pacman_ruby = "#{pacman_arch}-ruby#{ packagever=='head' ? '-head' : rubyver2.gsub(".","") }"
   end
 end
 
 ovl_glob('recipes/*/task.rake').each{|f| load(ovl_expand_file(f)) }
 
 ruby_arch_packages = %w[x64 x86].map do |arch|
-  %w[2.4.2-2 2.5.0-snapshot].map do |packagever|
+  %w[2.4.4-2 2.5.1-2 head].map do |packagever|
     RubyPackage.new( packagever: packagever, arch: arch, rootdir: __dir__ ).freeze
   end
 end

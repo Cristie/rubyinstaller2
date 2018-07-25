@@ -12,6 +12,8 @@ const
 
 var
   PathChkBox, PathExtChkBox, Utf8ChkBox, DevkitChkBox: TCheckBox;
+  CompLabel: TLabel;
+  ComplistPrevClickCheck: TNotifyEvent;
 
 function IsAssociated(): Boolean;
 begin
@@ -85,6 +87,47 @@ begin
   ShellExec('open', ridkpath, 'install', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
 end;
 
+procedure ComplistClickCheck(Sender: TObject);
+var
+  msysdir: String;
+  update: Boolean;
+begin
+  update := GetUninstallString() <> '';
+  msysdir := Msys2AlreadyInstalled();
+
+  if update then
+    if msysdir <> '' then
+      if IsComponentSelected('msys2') then
+        CompLabel.Caption := 'ATTENTION: MSYS2 is already present in ' + msysdir + '. It will be deleted now and then re-installed. Additional installed pacman packages will be removed. Some gems might not work afterwards and must be re-installed.'
+      else
+        CompLabel.Caption := 'Ruby in ' + ExpandConstant('{app}') + ' will be updated. MSYS2 seems to be already present in ' + msysdir + ' . It will kept untouched and will be reused for this Ruby installation. Optionally it can be updated per `ridk install` on the last page of the installer.'
+    else
+      if IsComponentSelected('msys2') then
+        CompLabel.Caption := 'Ruby in ' + ExpandConstant('{app}') + ' will be updated and MSYS2 will be installed into ' + ExpandConstant('{app}\{#MsysDir}') + '. Please run `ridk install` on the last installer page to initialize it. It can be updated later per `ridk install` as well.'
+      else
+        CompLabel.Caption := 'Ruby in ' + ExpandConstant('{app}') + ' will be updated. It''s possible to install MSYS2 at the last page of the installer or to reuse an existing MSYS2 installation.'
+  else
+    if msysdir <> '' then
+      if IsComponentSelected('msys2') then
+        CompLabel.Caption := 'ATTENTION: MSYS2 is already present in ' + msysdir + '. It will be deleted now and then re-installed. Additional installed pacman packages will be removed. Some gems might not work afterwards and must be re-installed.'
+      else
+        CompLabel.Caption := 'Ruby will be installed into ' + ExpandConstant('{app}') + '. MSYS2 seems to be already present in ' + msysdir + ' . It will kept untouched and will be re-used for this Ruby installation. Optionally it can be updated per `ridk install` on the last page of the installer.'
+    else
+      if IsComponentSelected('msys2') then
+        CompLabel.Caption := 'Ruby will be installed into ' + ExpandConstant('{app}') + ' and MSYS2 will be installed into ' + ExpandConstant('{app}\{#MsysDir}') + '. Please run `ridk install` on the last installer page to initialize it. It can be updated later per `ridk install` as well.'
+      else
+        CompLabel.Caption := 'Ruby will be installed into ' + ExpandConstant('{app}') + ' without MSYS2. It''s possible to install MSYS2 at the last page of the installer or to reuse an existing MSYS2 installation.';
+
+  ComplistPrevClickCheck(Sender);
+end;
+
+procedure EnableMsys2Component(enable: Boolean);
+begin
+  {* InnoSetup doesn't provide corresponding setter for IsComponentSelected, so that we alter the ComponentsList directly. *}
+  if WizardForm.ComponentsList.Items.Count > 1 then
+    WizardForm.ComponentsList.Checked[1] := enable;
+end;
+
 procedure InitializeGUI;
 var
   ChkBoxCurrentY: Integer;
@@ -92,6 +135,25 @@ var
   HostPage: TNewNotebookPage;
   URLText, TmpLabel: TNewStaticText;
 begin
+
+  {* Add label to components list *}
+
+  CompLabel := TLabel.Create(WizardForm);
+  CompLabel.Parent := WizardForm.SelectComponentsPage;
+  CompLabel.Left := WizardForm.ComponentsList.Left;
+  CompLabel.Width := WizardForm.ComponentsList.Width;
+  CompLabel.Height := ScaleY(40);
+  CompLabel.Top :=
+    WizardForm.ComponentsList.Top + WizardForm.ComponentsList.Height - CompLabel.Height;
+  CompLabel.AutoSize := False;
+  CompLabel.WordWrap := True;
+
+  WizardForm.ComponentsList.Height :=
+    WizardForm.ComponentsList.Height - CompLabel.Height - ScaleY(8);
+
+  {* Bypass click event on ComponentsList *}
+  ComplistPrevClickCheck := WizardForm.ComponentsList.OnClickCheck;
+  WizardForm.ComponentsList.OnClickCheck := @ComplistClickCheck;
 
   {* Path, and file association task check boxes *}
 

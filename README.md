@@ -23,6 +23,7 @@ Fortunately it can be added easily.
 It downloads and installs all necessary MSYS2 build tools that are typically required to compile C based ruby gems.
 Some gems require additional packages, which can be installed per `pacman`. See below.
 Its also possible to install MSYS2 manually from https://msys2.github.io/ and run `ridk install` afterwards to add non default, but required development tools.
+For unattended install of Ruby and MSYS2 see the [FAQ chocolatey install](https://github.com/oneclick/rubyinstaller2/wiki/FAQ#user-content-choco-install).
 
 ### The `ridk` command
 
@@ -49,7 +50,7 @@ This makes `sh`, `pacman`, `make` etc. available on the command line.
 ### Install gems with C-extensions and additional library dependencies
 
 The base MSYS2 setup includes compilers and other build tools, but doesn't include libraries or DLLs that some gems require as their dependencies.
-Fortunatelly many of the required libraries are available through the MSYS2 repositories.
+Fortunately many of the required libraries are available through the MSYS2 repositories.
 They can be installed per `ridk exec pacman -S mingw-w64-x86_64-libraryname` similar to `apt-get` on Linux.
 Exchange the prefix `mingw-w64-x86_64` by `mingw-w64-i686` for the 32-bit RubyInstaller.
 
@@ -79,9 +80,11 @@ It doesn't compile any sources, but makes use of the [MSYS2-MINGW repository](ht
 ### Automatic build on Appveyor
 
 The installer is regularly built on [AppVeyor](https://ci.appveyor.com/project/larskanis/rubyinstaller2-hbuor) for each push to the github repository.
-In addition to this, a daily build of the latest ruby development snapshot is compiled and packaged as RubyInstaller and RubyBundle (with integrated MSYS) files.
-It can be downloaded from [AppVeyor](https://ci.appveyor.com/project/larskanis/rubyinstaller2-hbuor) as build artifacts as well.
 AppVeyor also executes the installer and runs all tests on it, so that we are notified about breaking changes.
+In addition to this, a daily build of the latest ruby development snapshot is compiled and packaged as RubyInstaller files.
+It can be downloaded from [github releases](https://github.com/oneclick/rubyinstaller2/releases/tag/rubyinstaller-head) or from [AppVeyor](https://ci.appveyor.com/project/larskanis/rubyinstaller2-hbuor) as build artifacts.
+Check the wiki on how to use [ruby-head versions on Appveyor](https://github.com/oneclick/rubyinstaller2/wiki/For-gem-developers#user-content-appveyor) for your CI builds.
+
 
 ### Build RubyInstaller2 on your own machine:
 
@@ -108,4 +111,5 @@ AppVeyor also executes the installer and runs all tests on it, so that we are no
 ## Known Issues
 
 - Avoid running this project in a PATH containing spaces.
+- Ruby on Windows is still using non UTF-8 default external encoding: Raised [as ruby bug](https://bugs.ruby-lang.org/issues/13488).
 - Also refer to [the issue list](https://github.com/larskanis/rubyinstaller2/issues).

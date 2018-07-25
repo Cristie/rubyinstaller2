@@ -1,3 +1,86 @@
+## RubyInstaller-2.5.1-2 - 2018-06-24
+
+### Changed
+- Update `ridk install` to download msys2 installer version 20180531. #115
+- Fix MSYS2 detection in `ridk install`. This broke download of MSYS2 installer. #114
+- Don't crash when the mingw directory within MSYS2 isn't present.
+- Update of the SSL CA certificate list.
+
+
+## RubyInstaller-2.4.4-2 - 2018-06-24
+
+### Changed
+- Update `ridk install` to download msys2 installer version 20180531. #115
+- Fix MSYS2 detection in `ridk install`. This broke download of MSYS2 installer. #114
+- Don't crash when the mingw directory within MSYS2 isn't present.
+- Update of the SSL CA certificate list.
+
+
+## RubyInstaller-2.5.1-1 - 2018-03-29
+
+### Added
+- New installer for Ruby with builtin MSYS2 Devkit toolchain. #42
+
+### Changed
+- Update to ruby-2.5.1, see [release notes](https://www.ruby-lang.org/en/news/2018/03/28/ruby-2-5-1-released/).
+- Update to OpenSSL-1.1.0h .
+- Make installers with/without Devkit compatible, so that both can be mixed like:
+  - Install RubyInstaller-Devkit first and update with smaller RubyInstaller later
+  - Install RubyInstaller first and update by RubyInstaller-Devkit
+
+
+## RubyInstaller-2.4.4-1 - 2018-03-29
+
+### Added
+- New installer for Ruby with builtin MSYS2 Devkit toolchain. #42
+
+### Changed
+- Update to ruby-2.4.4, see [release notes](https://www.ruby-lang.org/en/news/2018/03/28/ruby-2-4-4-released/).
+- Update to OpenSSL-1.0.2o .
+- Make installers with/without Devkit compatible, so that both can be mixed like:
+  - Install RubyInstaller-Devkit first and update with smaller RubyInstaller later
+  - Install RubyInstaller first and update by RubyInstaller-Devkit
+
+
+## RubyInstaller-2.5.0-2 - 2018-02-27
+
+### Changed
+- Don't abort but fix pacman conflicts while 'ridk install'. #101
+
+
+## RubyInstaller-2.4.3-2 - 2018-02-27
+
+### Changed
+- Don't abort but fix pacman conflicts while 'ridk install'. #101
+
+
+## RubyInstaller-2.5.0-1 - 2017-12-25
+
+### Added
+- Add ruby-2.5.0, see [release notes](https://www.ruby-lang.org/en/news/2017/12/25/ruby-2-5-0-released/).
+
+### Changed
+- RubyInstaller-2.5 bundles OpenSSL-1.1.0 (instead of 1.0.2 of RubyInstaller-2.4).
+  This has some [implications to the Ruby API to OpenSSL](https://bugs.ruby-lang.org/issues/12324).
+
+
+## RubyInstaller-2.4.3-1 - 2017-12-20
+
+### Changed
+- Update to ruby-2.4.3, see [release notes](https://www.ruby-lang.org/en/news/2017/12/14/ruby-2-4-3-released/).
+- Ignore invalid character encodings when scaning registry for MSYS2.
+  [#86](https://github.com/oneclick/rubyinstaller2/issues/86)
+- Update of the SSL CA certificate list.
+- Uninstall old RubyInstaller version when doing update.
+  It avoids broken and orphaned links in the startmenu
+  [#78](https://github.com/oneclick/rubyinstaller2/issues/78#issuecomment-330115604).
+  See also [updating RubyInstaller](https://github.com/oneclick/rubyinstaller2/wiki/FAQ#q-what-is-recommended-way-to-update-a-ruby-installation).
+
+### Removed
+- Remove package 'winstorecompat' from default dev tools, to make `ridk install` step 2 optional.
+  [#88](https://github.com/oneclick/rubyinstaller2/issues/88)
+
+
 ## RubyInstaller-2.4.2-2 - 2017-09-15
 
 ### Changed

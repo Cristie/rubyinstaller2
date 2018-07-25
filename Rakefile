@@ -8,7 +8,7 @@ include RubyInstaller::Build::Utils
 task :gem => :build
 
 # Forward package build tasks to the sub Rakefiles.
-%w[rubyinstaller rubybundle].each do |packname|
+%w[ri ri-msys].each do |packname|
   namespace packname do |ns|
     Rake::TaskManager.record_task_metadata = true
     Rake.load_rakefile "packages/#{packname}/Rakefile"
@@ -88,5 +88,25 @@ namespace "release" do
       token: ENV['DEPLOY_TOKEN'],
       files: files
     )
+  end
+
+  task "appveyor_upload" do
+    files = ARGV[ARGV.index("--")+1 .. -1]
+    files.each { |f| task(f) }
+    if ENV['DEPLOY_TAG'].to_s.include?(ENV['target_ruby'])
+      puts "Upload #{ENV['DEPLOY_TAG']}: #{files}"
+
+      require "ruby_installer/build"
+      RubyInstaller::Build.enable_msys_apps
+
+      sh "c:/msys64/usr/bin/mkdir -p /c/Users/appveyor/.gnupg"
+      sh "gpg --passphrase %GPGPASSWD% --decrypt appveyor-key.asc.asc | gpg --import"
+      sh "c:/msys64/usr/bin/mkdir artifacts"
+      sh "cp", "-v", *files, "artifacts/"
+      sh "ls artifacts/* | xargs -n1 gpg --verbose --detach-sign --armor"
+      sh "rake release:upload -- artifacts/*"
+    else
+      puts "No release upload"
+    end
   end
 end

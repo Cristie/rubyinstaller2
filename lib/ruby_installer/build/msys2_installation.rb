@@ -48,8 +48,12 @@ module Build # Use for: Build, Runtime
         Win32::Registry::HKEY_CURRENT_USER.open(backslachs(MSYS2_INSTALL_KEY)) do |reg|
           reg.each_key do |subkey|
             subreg = reg.open(subkey)
-            if subreg['DisplayName'] =~ /^MSYS2 / && File.directory?(il=subreg['InstallLocation'])
-              yield il
+            begin
+              if subreg['DisplayName'] =~ /^MSYS2 / && File.directory?(il=subreg['InstallLocation'])
+                yield il
+              end
+            rescue Encoding::InvalidByteSequenceError
+              # Ignore entries with broken character encoding
             end
           end
         end
@@ -90,7 +94,7 @@ module Build # Use for: Build, Runtime
       @mingwdir ||= begin
         DllDirectory.set_defaults
         path = mingw_bin_path
-        DllDirectory.new(path)
+        DllDirectory.new(path) if File.directory?(path)
       rescue MsysNotFound
         # We silently ignore this error to allow Ruby installations without MSYS2.
       end
